@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Customer Churn Dashboard</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+
+background:linear-gradient(135deg,#0f172a,#1e3a8a,#2563eb);
+
+min-height:100vh;
+
+padding:40px;
+
+font-family:Arial,sans-serif;
+
+transition:.4s;
+
+}
+
+body.light{
+
+background:#f2f5fa;
+
+}
+
+h2,h3{
+
+color:white;
+
+font-weight:bold;
+
+}
+
+body.light h2,
+body.light h3{
+
+color:#222;
+
+}
+
+.card{
+
+border:none;
+
+border-radius:18px;
+
+box-shadow:0 10px 25px rgba(0,0,0,.25);
+
+transition:.35s;
+
+overflow:hidden;
+
+}
+
+.card:hover{
+
+transform:translateY(-6px);
+
+}
+
+.chart-card img{
+
+width:100%;
+
+border-radius:15px;
+
+}
+
+.btn{
+
+padding:12px 28px;
+
+font-size:16px;
+
+border-radius:10px;
+
+font-weight:bold;
+
+}
+
+.counter{
+
+font-size:34px;
+
+font-weight:bold;
+
+}
+
+.top-bar{
+
+display:flex;
+
+justify-content:space-between;
+
+align-items:center;
+
+margin-bottom:30px;
+
+flex-wrap:wrap;
+
+gap:15px;
+
+}
+
+.insight-box{
+
+background:#fff8dc;
+
+border-left:6px solid orange;
+
+padding:20px;
+
+border-radius:15px;
+
+font-size:18px;
+
+}
+
+.timeline{
+
+border-left:4px solid #0d6efd;
+
+padding-left:20px;
+
+}
+
+.timeline-item{
+
+margin-bottom:18px;
+
+position:relative;
+
+}
+
+.timeline-item::before{
+
+content:"";
+
+width:14px;
+
+height:14px;
+
+background:#0d6efd;
+
+border-radius:50%;
+
+position:absolute;
+
+left:-28px;
+
+top:5px;
+
+}
+.chat-box{
+
+height:350px;
+
+overflow-y:auto;
+
+background:#f8f9fa;
+
+padding:15px;
+
+border-radius:15px;
+
+}
+
+.chat-message{
+
+margin-bottom:15px;
+
+padding:10px 15px;
+
+border-radius:12px;
+
+max-width:85%;
+
+word-wrap:break-word;
+
+}
+
+.bot{
+
+background:#dbeafe;
+
+margin-right:auto;
+
+}
+
+.user{
+
+background:#dcfce7;
+
+margin-left:auto;
+
+text-align:right;
+
+}
+
+/* ============================= */
+/* FLOATING AI ASSISTANT */
+/* ============================= */
+
+#chatbot{
+
+position:fixed;
+
+bottom:25px;
+
+right:25px;
+
+width:360px;
+
+z-index:99999;
+
+}
+
+#chatbot .card{
+
+border-radius:20px;
+
+overflow:hidden;
+
+box-shadow:0 15px 40px rgba(0,0,0,.35);
+
+}
+
+#chatBody{
+
+height:340px;
+
+overflow-y:auto;
+
+padding:15px;
+
+background:#f8f9fa;
+
+}
+
+#chatbot .card-header{
+
+cursor:pointer;
+
+font-weight:bold;
+
+font-size:18px;
+
+}
+
+@media(max-width:768px){
+
+#chatbot{
+
+width:95%;
+
+right:2.5%;
+
+bottom:15px;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="chatbot">
+
+<div class="card">
+
+<div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+
+
+<span>🤖 AI Assistant</span>
+
+<button class="btn btn-sm btn-light" onclick="toggleChat()">—</button>
+
+</div>
+
+<div id="chatContainer" style="display:block;">
+
+<div id="chatBody">
+
+<div class="alert alert-primary">
+
+Hello 👋<br><br>
+
+I am your AI Customer Churn Assistant.<br>
+
+Ask me anything about Customer Churn.
+
+</div>
+
+</div>
+
+<div class="card-footer" id="chatFooter">
+
+<div class="input-group">
+
+<input id="chatInput" class="form-control" placeholder="Ask something...">
+
+<button class="btn btn-primary" onclick="sendMessage()">Send</button>
+
+<button class="btn btn-success" onclick="startVoice()">🎤</button>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="container" id="dashboard">
+    <!-- ===================== -->
+<!-- TOP BAR -->
+<!-- ===================== -->
+
+<div class="top-bar">
+
+<h2>
+
+📊 Customer Churn Dashboard
+
+</h2>
+
+<div>
+
+<button
+class="btn btn-light me-2"
+onclick="toggleTheme()">
+
+🌙 Mode
+
+</button>
+
+<button
+class="btn btn-success"
+onclick="downloadPDF()">
+
+📥 Download PDF
+
+</button>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- TOP STATISTICS -->
+<!-- ===================== -->
+
+<div class="row g-4">
+
+<div class="col-md-3">
+
+<div class="card bg-primary text-white">
+
+<div class="card-body text-center">
+
+<h5>Total Predictions</h5>
+
+<h2 class="counter">
+
+{{ total_predictions }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card bg-danger text-white">
+
+<div class="card-body text-center">
+
+<h5>Churn Customers</h5>
+
+<h2 class="counter">
+
+{{ churn_count }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card bg-success text-white">
+
+<div class="card-body text-center">
+
+<h5>No Churn</h5>
+
+<h2 class="counter">
+
+{{ no_churn_count }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card bg-warning">
+
+<div class="card-body text-center">
+
+<h5>Average Probability</h5>
+
+<h2 class="counter">
+
+{{ avg_probability }}%
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- SECOND ROW -->
+<!-- ===================== -->
+
+<div class="row mt-4">
+    <div class="col-md-3">
+
+<div class="card bg-info text-white">
+
+<div class="card-body text-center">
+
+<h5>🎯 Prediction Success Rate</h5>
+
+<h2 class="counter">
+
+{{ success_rate }}%
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card bg-dark text-white">
+
+<div class="card-body text-center">
+
+<h5>⚠ Customer Risk Level</h5>
+
+<h2>
+
+{{ risk_level }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card bg-secondary text-white">
+
+<div class="card-body text-center">
+
+<h5>📅 Today's Predictions</h5>
+
+<h2 class="counter">
+
+{{ today_predictions }}
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-3">
+
+<div class="card bg-success text-white">
+
+<div class="card-body text-center">
+
+<h5>🤝 Retention Rate</h5>
+
+<h2 class="counter">
+
+{{ retention_rate }}%
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- THIRD ROW -->
+<!-- ===================== -->
+
+<div class="row mt-4">
+
+<div class="col-md-12">
+
+<div class="card bg-primary text-white">
+
+<div class="card-body text-center">
+
+<h5>🧠 Average AI Confidence</h5>
+
+<h2 class="counter">
+
+{{ avg_confidence }}%
+
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<hr class="my-5 text-white">
+
+<h3 class="text-center mb-4">
+
+📈 Analytics Charts
+
+</h3>
+
+<div class="row g-4">
+    <div class="col-md-6">
+
+<div class="card chart-card">
+
+<div class="card-body text-center">
+
+<h5 class="mb-3">
+
+Prediction Distribution
+
+</h5>
+
+<img
+src="{{ url_for('static', filename='charts/pie_chart.png') }}"
+alt="Pie Chart">
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<div class="card chart-card">
+
+<div class="card-body text-center">
+
+<h5 class="mb-3">
+
+Prediction Probability
+
+</h5>
+
+<img
+src="{{ url_for('static', filename='charts/probability_chart.png') }}"
+alt="Probability Chart">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- FEATURE IMPORTANCE -->
+<!-- ===================== -->
+
+<div class="row mt-4">
+
+<div class="col-md-12">
+
+<div class="card chart-card">
+
+<div class="card-body text-center">
+
+<h5 class="mb-3">
+
+🔥 Top 10 Important Features
+
+</h5>
+
+<img
+src="{{ url_for('static', filename='charts/feature_importance.png') }}"
+alt="Feature Importance">
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- AI INSIGHTS -->
+<!-- ===================== -->
+
+<div class="row mt-4">
+    <div class="col-md-6">
+
+<div class="card border-success">
+
+<div class="card-body">
+
+<h4 class="text-success">
+
+🤖 AI Insights
+
+</h4>
+
+<ul class="mt-3">
+
+<li>Total Predictions : {{ total_predictions }}</li>
+
+<li>Average Risk : {{ risk_level }}</li>
+
+<li>Retention Rate : {{ retention_rate }}%</li>
+
+<li>Average Confidence : {{ avg_confidence }}%</li>
+
+<li>Model Used : {{ model_name }}</li>
+
+</ul>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<div class="card border-primary">
+
+<div class="card-body">
+
+<h4 class="text-primary">
+
+🔥 Recent Prediction Timeline
+
+</h4>
+
+<div class="timeline">
+
+<div class="timeline-item">
+
+Prediction Completed Successfully
+
+</div>
+
+<div class="timeline-item">
+
+Dashboard Updated
+
+</div>
+
+<div class="timeline-item">
+
+Charts Generated
+
+</div>
+
+<div class="timeline-item">
+
+AI Recommendation Ready
+
+</div>
+
+<div class="timeline-item">
+
+Customer History Saved
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- MODEL INFO -->
+<!-- ===================== -->
+
+<div class="row mt-4">
+    <div class="col-md-6">
+
+<div class="card">
+
+<div class="card-body text-center">
+
+<h4>
+
+🤖 AI Model Used
+
+</h4>
+
+<h3 class="text-primary mt-3">
+
+{{ model_name }}
+
+</h3>
+
+<p class="text-muted">
+
+Machine Learning model used for Customer Churn Prediction.
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="col-md-6">
+
+<div class="card">
+
+<div class="card-body text-center">
+
+<h4>
+
+🎯 Model Status
+
+</h4>
+
+<h3 class="text-success mt-3">
+
+{{ accuracy }}
+
+</h3>
+
+<p class="text-muted">
+
+Model Loaded Successfully
+
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<!-- ===================== -->
+<!-- BUTTONS -->
+<!-- ===================== -->
+
+<div class="text-center mt-5">
+
+<a href="/" class="btn btn-dark">
+
+🏠 Back to Home
+
+</a>
+
+<a href="/history"
+
+class="btn btn-secondary ms-2">
+
+📜 Prediction History
+
+</a>
+
+</div>
+
+</div>
+
+<script>
+
+// =====================
+// THEME
+// =====================
+
+function toggleTheme(){
+
+document.body.classList.toggle("light");
+
+localStorage.setItem(
+
+"theme",
+
+document.body.classList.contains("light")
+
+? "light"
+
+: "dark"
+
+);
+
+}
+
+window.onload=function(){
+
+if(localStorage.getItem("theme")=="light"){
+
+document.body.classList.add("light");
+
+}
+
+document.querySelectorAll(".counter").forEach(function(counter){
+
+let target=parseFloat(counter.innerText.replace("%",""));
+
+if(isNaN(target)) return;
+
+let current=0;
+
+let step=target/80;
+let interval=setInterval(function(){
+
+current+=step;
+
+if(current>=target){
+
+current=target;
+
+clearInterval(interval);
+
+}
+
+if(counter.innerText.includes("%")){
+
+counter.innerHTML=current.toFixed(0)+"%";
+
+}else{
+
+counter.innerHTML=Math.floor(current);
+
+}
+
+},20);
+
+});
+
+};
+
+// =====================
+// DOWNLOAD PDF
+// =====================
+
+function downloadPDF(){
+
+const element=document.getElementById("dashboard");
+
+html2pdf().from(element).set({
+
+margin:0.4,
+
+filename:"Customer_Churn_Dashboard.pdf",
+
+image:{
+type:"jpeg",
+quality:1
+},
+
+html2canvas:{
+scale:2
+},
+
+jsPDF:{
+unit:"in",
+format:"a4",
+orientation:"portrait"
+}
+
+}).save();
+
+}
+
+// =====================
+// FLOATING CHATBOT
+// =====================
+
+function toggleChat(){
+
+const container=document.getElementById("chatContainer");
+
+if(container.style.display==="none"){
+
+container.style.display="block";
+
+}else{
+
+container.style.display="none";
+
+}
+
+}
+// =====================
+// AI CHATBOT
+// =====================
+
+async function sendMessage(){
+
+let input=document.getElementById("chatInput");
+
+let text=input.value.trim();
+
+if(text==="") return;
+
+let chat=document.getElementById("chatBody");
+
+chat.innerHTML+=`
+
+<div class="chat-message user">
+
+${text}
+
+</div>
+
+`;
+
+chat.scrollTop=chat.scrollHeight;
+
+input.value="";
+
+try{
+
+const response=await fetch("/chatbot",{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+message:text
+
+})
+
+});
+
+const data=await response.json();
+
+chat.innerHTML+=`
+
+<div class="chat-message bot">
+
+🤖 ${data.reply}
+
+</div>
+
+`;
+
+chat.scrollTop=chat.scrollHeight;
+
+speakText(data.reply);
+
+}
+
+catch(error){
+
+chat.innerHTML+=`
+
+<div class="chat-message bot">
+
+❌ AI Server not responding.
+
+</div>
+
+`;
+
+chat.scrollTop=chat.scrollHeight;
+
+}
+
+}
+
+// =====================
+// VOICE ASSISTANT
+// =====================
+
+const SpeechRecognition=
+
+window.SpeechRecognition ||
+
+window.webkitSpeechRecognition;
+if(SpeechRecognition){
+
+const recognition=new SpeechRecognition();
+
+recognition.lang="en-US";
+
+recognition.continuous=false;
+
+recognition.interimResults=false;
+
+window.startVoice=function(){
+
+recognition.start();
+
+};
+
+recognition.onresult=function(event){
+
+const text=event.results[0][0].transcript;
+
+document.getElementById("chatInput").value=text;
+
+sendMessage();
+
+};
+
+recognition.onerror=function(event){
+
+console.log("Voice Error:",event.error);
+
+};
+
+recognition.onend=function(){
+
+console.log("Voice Recognition Ended");
+
+};
+
+}
+
+// =====================
+// AI SPEAK
+// =====================
+
+function speakText(text){
+
+const speech=new SpeechSynthesisUtterance(text);
+
+speech.lang="en-US";
+
+speech.rate=1;
+
+speech.pitch=1;
+
+window.speechSynthesis.cancel();
+
+setTimeout(function(){
+
+window.speechSynthesis.speak(speech);
+
+},100);
+}
+
+</script>
+
+</body>
+
+</html>

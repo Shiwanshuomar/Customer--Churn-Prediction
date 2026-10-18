@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Bulk Customer Prediction</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<style>
+
+body{
+background:#0f172a;
+color:white;
+font-family:Segoe UI;
+padding:40px;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+background:#1e293b;
+padding:40px;
+border-radius:20px;
+}
+
+.btn-success{
+width:100%;
+font-size:20px;
+padding:15px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h2 class="mb-4 text-center">
+📂 Bulk Customer Churn Prediction
+</h2>
+
+<form action="/bulk_prediction" method="POST" enctype="multipart/form-data">
+
+<label class="mb-2">
+Select CSV File
+</label>
+
+<input
+type="file"
+name="csv_file"
+class="form-control mb-4"
+accept=".csv"
+required>
+
+<button class="btn btn-success">
+🚀 Predict All Customers
+</button>
+
+</form>
+
+<br>
+
+<a href="/" class="btn btn-warning">
+⬅ Back
+</a>
+
+</div>
+
+</body>
+</html>

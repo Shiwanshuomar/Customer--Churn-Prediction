@@ -1,0 +1,14 @@
+.env
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.idea/
+.vscode/
+.DS_Store
+uploads/*
+!uploads/.gitkeep
+storage/history.json
+storage/users.json
+reports/*.pdf
